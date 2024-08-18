@@ -1,0 +1,14 @@
+public class BankAccount {
+    private double balance;
+
+    // Constructor to initialize the account with an initial balance
+    public BankAccount(double initialBalance) {
+        this.balance = initialBalance;
+    }
+
+    // Method to get the current balance
+    public double getBalance() {
+        return balance;
+    }
+
+    // Method to deposit money⬤
