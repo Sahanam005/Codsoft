@@ -6,9 +6,9 @@ public class BankAccount {
         this.balance = initialBalance;
     }
 
-    // Method to get the current balance
+   
     public double getBalance() {
         return balance;
     }
 
-    // Method to deposit money⬤
+    
