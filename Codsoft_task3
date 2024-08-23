@@ -1,14 +1,191 @@
-public class BankAccount {
+import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public final class ATM{
     private double balance;
-
-   
-    public BankAccount(double initialBalance) {
-        this.balance = initialBalance;
-    }
-
-   
-    public double getBalance() {
-        return balance;
-    }
-
+    private final Scanner scanner;
+    private final Map<Integer, Double>users;
+    private int currentpin;
+    double MINIMUM_BALANCE = 1000.0; //minimum_balance to be kept.
     
+
+    public ATM(){
+        balance = 0.0; //account balance 
+        scanner = new Scanner(System.in);
+        users = new HashMap<>();
+        initializeDatabase();
+    } 
+    public void initializeDatabase() {
+        users.put(1234, 1000.0);
+    }
+    //To create pin 
+    public void createPIN(){
+        System.err.println("ENTER THE PIN:");
+        int newpin = scanner.nextInt();
+
+if (users.containsKey(newpin)) {
+            System.out.println("PIN already exists.");
+            return;
+        }
+        users.put(newpin, 0.0); 
+        System.out.println("NEW PIN CREATED");
+    }
+    //pin verification
+    public boolean verifyPIN(){
+        System.out.println("ENTER THE PIN:");
+        int pin = scanner.nextInt();
+
+        if (users.containsKey(pin)) {
+            currentpin = pin;
+            balance = users.get(pin);
+            System.out.println("PIN verified successfully.");
+            return true;
+        } else {
+            System.out.println("Invalid PIN. Access denied.");
+            return false;
+        }
+    }
+    //display menu
+    public void displaymenu(){
+        System.out.println("WELCOME TO ATM");
+        System.out.println("1. CHECK BALANCE");
+        System.out.println("2. WITHDRAW");
+        System.out.println("3. DEPOSIT");
+        System.out.println("4.CARDLESS DEPOSIT");
+        System.out.println("5.CARDLESS WITHDRAW");
+        System.out.println("6. EXIT");
+    }
+    // check balance
+    public void checkbalance(){
+        System.out.println("BALANCE:"+balance);
+    }
+    // Amount withdrawn 
+    public void withdraw(){
+        System.out.println("ENTER THE AMOUNT TO WITHDRAW:Rs.");
+        double amount = scanner.nextInt();
+        if (amount > 0 && amount<=MINIMUM_BALANCE){
+            balance -= amount;
+            System.out.println("WITHDRAWN SUCCESSFULLY Rs."+amount);
+        //cannot withdraw beyond minimum_balance 
+        }else if(balance - amount < MINIMUM_BALANCE){
+            System.out.println("CANNOT WITHDRAW,BEYOND LIMIT RS."+MINIMUM_BALANCE);
+        }else{
+            System.out.println("ENTER INVALID AMOUNT"+balance);
+        }
+    }
+// deposit
+    public void deposit(){
+        System.out.println("ENTER THE AMOUNT TO DEPOSIT:Rs.");
+        double amount =scanner.nextDouble();
+        if (amount > 0){
+            balance += amount;
+            System.out.println("SUCCESSFULLY DEPOSITED Rs."+amount);
+        }else{
+            System.out.println("ENTER INVALID AMOUNT");
+        }
+    }
+// cardlessdesposit using OTP generator
+    public void cardlessdeposit(){
+        String generateotp = generateOTP(4);
+        System.out.println("OTP IS: "+generateotp);
+        System.out.println("ENTER THE OTP");
+        String userotp = scanner.next();
+        //otp verification for cardless deposit.
+        if(userotp.equals(generateotp)){
+            System.out.println("ENTER THE AMOUNT TO DEPOSIT:Rs.");
+            double amount = scanner.nextDouble();
+            if (amount > 0){
+                balance += amount;
+                System.out.println("SUCCESFULLY DEPOSITED Rs."+balance);
+            }else{
+                System.out.println("ENTER INVALID AMOUNT");
+            }
+        }else{
+            System.out.println("INVALID OTP,TRANSACTION FAILED");
+            System.out.println("TRY AGAIN...");
+        }
+    }
+//cardless withdraw using OTP genrator
+    public void cardlesswithdraw(){
+        String generateotp = generateOTP(4);
+        System.out.println("OTP IS: "+generateotp);
+        System.out.println("ENTER THE OTP :");
+        String userotp =scanner.next();
+
+        //otp verification for cardless withdrawal.
+        if(userotp.equals(generateotp)){
+            System.out.println("ENTER THE AMOUNT TO WITHDRWAN:Rs.");
+            double amount = scanner.nextDouble();
+            if (amount > 0 && balance - amount >= MINIMUM_BALANCE){
+                balance -= amount;
+                System.out.println("SUCCESFULLY WITHDRAWN Rs."+balance);
+            }else if (balance - amount < MINIMUM_BALANCE) {
+                System.out.println("CANNOT WITHDRAW,BEYOND LIMIT Rs."+MINIMUM_BALANCE);
+            }else{
+                System.out.println("ENTER INVALID AMOUNT");
+            }
+        }else{
+            System.out.println("INVALID OTP,TRANSACTION FAILED");
+            System.out.println("TRY AGAIN...");
+        }
+    }
+//Random OTP generate of length:4
+    public String generateOTP(int length) {
+        SecureRandom random = new SecureRandom();
+        StringBuilder otp = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            otp.append(random.nextInt(10));
+        }
+        return otp.toString();
+    }
+    public void start(){
+        System.out.println("1.CREATE PIN");
+        System.out.println("2.ENTER EXCISTING PIN");
+
+        int option = scanner.nextInt();
+        //New pin creation
+        if (option == 1) {  
+            createPIN(); 
+        }
+    
+        if (verifyPIN()){  //pin verfication
+            while(true){
+                displaymenu();
+                int choice = scanner.nextInt();
+
+                //switch case
+                switch (choice){ // Selection of option
+                    case 1:
+                    checkbalance();
+                    break;
+                    case 2:
+                    withdraw();
+                    break;
+                    case 3:
+                    deposit();
+                    break;
+                    case 4:
+                    cardlessdeposit();
+                    break;
+                    case 5:
+                    cardlesswithdraw();
+                    break;
+                    case 6:
+                    System.out.println("THANK YOU FOR VISTING THE ATM....");
+                    return;
+                    default:
+                    System.out.println("INVALID OPTION");
+                }
+                System.out.println();
+            }
+        }
+    }
+    //main class
+    public static void main(String[] args) {
+        ATM atm= new ATM();
+        atm.start();
+    }
+
+}
